@@ -18,20 +18,18 @@ class Constant:
         self.indexToFirstNameIPA = 3
 
 
-def get_wordbet_output(file_name = 'no_c.txt'):
+def get_wordbet_output(file_name = 'output.csv'):
     input_file = open(file_name, 'r')
     wordbet_list = []
     for line_entry in input_file:
-        wordbet_list.append('\t' + line_entry)
-    print(wordbet_list[:10])
+        wordbet_list.append('\t' + line_entry.lower())
     return wordbet_list
 
-def get_name_input (file_name = 'name.txt'):
+def get_name_input (file_name = 'input.csv'):
     input_file = open(file_name, 'r')
     name_list = []
     for line_entry in input_file:
-        name_list.append(line_entry.strip())
-    print(name_list[:10])
+        name_list.append(line_entry.strip().lower())
     return name_list
 
 class Util (object):
@@ -52,6 +50,7 @@ class Util (object):
             lineEntry = lineEntry.strip()
             nameLetters = lineEntry.split(' ')
             filteredName = [ch for ch in nameLetters if len(ch) == 1]
+
             assembledName = ''.join(filteredName)
             if assembledName == '': 
                 break
@@ -77,8 +76,8 @@ class Util (object):
             ipaList.append(ipaValue)
         if fileIndex not in self.indexToNameIPA or len(self.indexToNameIPA[fileIndex])%2 == 0:
             return
-        if len(ipaList) > 10:
-            return
+        # if len(ipaList) > 10:
+        #     return
         self.indexToNameIPA[fileIndex].append(''.join(ipaList))
 
 
@@ -122,23 +121,47 @@ class Util (object):
         
         nameFile = open('name.txt', 'w') 
         ipaFile = open('ipa.txt', 'w')
-
+        repeating = set()
 
         for key in self.indexToNameIPA: 
             if len(self.indexToNameIPA[key]) % 2 == 1: 
                 continue
+            repeat = False
             for currentIndex in range(0, len(self.indexToNameIPA[key])):
+                
                 if currentIndex == 0:
                     if self.indexToNameIPA[key][currentIndex] == '': 
-                        break
+                        continue
+                    if len(self.indexToNameIPA[key][1]) > 16:
+                        continue
+                    if self.indexToNameIPA[key][currentIndex] in repeating:
+                        repeat = True
+                        continue
+                    repeating.add(self.indexToNameIPA[key][currentIndex])
                     nameFile.write(self.indexToNameIPA[key][currentIndex] + '\n')
                 elif currentIndex == 1: 
+                    if len(self.indexToNameIPA[key][1]) > 16: 
+                        continue
+                    if repeat == True:
+                        repeat = False
+                        continue
                     ipaFile.write(self.indexToNameIPA[key][currentIndex] + '\n')
                 elif currentIndex == 2:
+                    if len(self.indexToNameIPA[key][3]) > 16: 
+                        continue
                     if self.indexToNameIPA[key][currentIndex] == '': 
                         break
+                    if self.indexToNameIPA[key][currentIndex] in repeating:
+                        repeat = True
+                        continue
+                    repeating.add(self.indexToNameIPA[key][currentIndex])
                     nameFile.write(self.indexToNameIPA[key][currentIndex] + '\n')
                 elif currentIndex == 3: 
+                    if len(self.indexToNameIPA[key][3]) > 16: 
+                        continue
+                    if repeat == True:
+                        repeat = False
+                        continue
                     ipaFile.write(self.indexToNameIPA[key][currentIndex] + '\n')
 
 
@@ -146,7 +169,7 @@ class Util (object):
 
     def combineData(self):
         input1 = "name.txt"
-        input2 = "ipa.txt"
+        input2 = "no_c.txt"
         outfile = "./combined.txt"
 
         f1 = []
@@ -176,8 +199,49 @@ class Util (object):
                 jointString = ''.join(listToPrint)
                 f.write(jointString)
 
+    def deleteOutput(self): 
+        for key in self.indexToNameIPA: 
+            if len(self.indexToNameIPA[key]) % 2 == 1: 
+                continue
+            finalIndex = len(self.indexToNameIPA[key]) - 1
+            currentIndex = 1
+            while currentIndex <= finalIndex: 
+                wordLength = len(self.indexToNameIPA[key][currentIndex])
+                if wordLength > 16: 
+                    del self.indexToNameIPA[key][currentIndex-1]
+                    del self.indexToNameIPA[key][currentIndex-1]
+                    finalIndex-=2
+                else:
+                    currentIndex+=2 
+            if len(self.indexToNameIPA[key]) == 0: 
+                del self.indexToNameIPA[key]
 
-    
+
+    def cleanOutput(self): 
+        input_f = "ipa.txt"
+        outfile = "no_c.txt"
+
+        f1 = []
+        f2 = []
+
+        with open(input_f) as f:
+            for line in f:
+                new_line = ''
+                seen_c = False
+                for ch in line.strip():
+                    if not seen_c:
+                        if ch == 'c':
+                            seen_c = True
+                        else:
+                            new_line += ch
+                    else:
+                        seen_c = False
+                f1.append(new_line)
+
+        with open(outfile, 'w') as f:
+            for i in range(len(f1)):
+                #if i >= len(f2): break
+                f.write(f1[i] + '\n')
 
 def main():
     util = Util()
@@ -185,10 +249,12 @@ def main():
     util.processRawData('lastNameLabel')
     util.processRawData('firstNameTrans')
     util.processRawData('firstNameLabel')
-    util.printDataStructure()
+    # util.printDataStructure()
+    # util.deleteOutput()
     util.writeData()
+    # util.outputFile()
+    util.cleanOutput()
     util.combineData()
-    util.outputFile()
 
 
 if __name__== "__main__":
