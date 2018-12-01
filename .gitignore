@@ -1,2 +1,5 @@
 /Corpus/
 /.DS_Store
+g2p-seq2seq/
+__pycache__/
+s2s.h5
