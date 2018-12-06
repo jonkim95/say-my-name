@@ -18,18 +18,19 @@ class Constant:
         self.indexToFirstNameIPA = 3
 
 
-def get_wordbet_output(file_name = 'output.csv'):
+def get_wordbet_output(file_name = 'no_c.txt'):
     input_file = open(file_name, 'r')
     wordbet_list = []
     for line_entry in input_file:
         wordbet_list.append('\t' + line_entry.lower())
     return wordbet_list
 
-def get_name_input (file_name = 'input.csv'):
+#retain end line
+def get_name_input (file_name = 'name.txt'):
     input_file = open(file_name, 'r')
     name_list = []
     for line_entry in input_file:
-        name_list.append(line_entry.strip().lower())
+        name_list.append(line_entry.lower())
     return name_list
 
 class Util (object):
@@ -134,9 +135,9 @@ class Util (object):
                         continue
                     if len(self.indexToNameIPA[key][1]) > 16:
                         continue
-                    if self.indexToNameIPA[key][currentIndex] in repeating:
-                        repeat = True
-                        continue
+                    # if self.indexToNameIPA[key][currentIndex] in repeating:
+                    #     repeat = True
+                    #     continue
                     repeating.add(self.indexToNameIPA[key][currentIndex])
                     nameFile.write(self.indexToNameIPA[key][currentIndex] + '\n')
                 elif currentIndex == 1: 
@@ -151,9 +152,9 @@ class Util (object):
                         continue
                     if self.indexToNameIPA[key][currentIndex] == '': 
                         break
-                    if self.indexToNameIPA[key][currentIndex] in repeating:
-                        repeat = True
-                        continue
+                    # if self.indexToNameIPA[key][currentIndex] in repeating:
+                    #     repeat = True
+                    #     continue
                     repeating.add(self.indexToNameIPA[key][currentIndex])
                     nameFile.write(self.indexToNameIPA[key][currentIndex] + '\n')
                 elif currentIndex == 3: 
